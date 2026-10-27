@@ -15,14 +15,18 @@ namespace GridGame.Core
         public GameStatus Status { get; private set; }
         public int Seed { get; private set; }
 
+        //Step 2:
+        public int VisionRadius { get; private set; }
+        public bool[,] Explored { get; private set; }
         private readonly int _maxSteps;
 
-        public GridGame(int width, int height, int maxSteps, int seed)
+        public GridGame(int width, int height, int maxSteps, int seed, int visionRadius = 2)
         {
             Width = width;
             Height = height;
             _maxSteps = maxSteps;
             Seed = seed;
+            VisionRadius = visionRadius; // Step 2
             Reset(seed);
         }
 
@@ -66,7 +70,25 @@ namespace GridGame.Core
                         TotalCoins++;
                     }
 
+            Explored = new bool[Width, Height];
+            RevealAround(Player);
             // TODO (Phase 6): Use BFS to ensure a valid path exists from start to exit; regenerate if unreachable *TODO(階段 6):用 BFS 確認起點到出口一定連通,不連通就重新生成
+        }
+
+        public bool IsVisible(int x, int y)
+        {
+            return Math.Abs(x - Player.x) <= VisionRadius
+                && Math.Abs(y - Player.y) <= VisionRadius;
+        }
+
+        private void RevealAround(Vec2Int center)
+        {
+            for (int dx = -VisionRadius; dx <= VisionRadius; dx++)
+                for (int dy = -VisionRadius; dy <= VisionRadius; dy++)
+                {
+                    int x = center.x + dx, y = center.y + dy;
+                    if (InBounds(x, y)) Explored[x, y] = true;
+                }
         }
 
         public bool InBounds(int x, int y) => x >= 0 && y >= 0 && x < Width && y < Height;
@@ -93,6 +115,8 @@ namespace GridGame.Core
                 };
 
             Player = next;
+            RevealAround(Player);   // Step 2
+            StepsLeft--;
             StepsLeft--;
             StepsUsed++;
 
@@ -121,5 +145,7 @@ namespace GridGame.Core
 
             return result;
         }
+
+
     }
 }

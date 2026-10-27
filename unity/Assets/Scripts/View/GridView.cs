@@ -9,6 +9,10 @@ public class GridView : MonoBehaviour
     [SerializeField] private int height = 10;
     [SerializeField] private int maxSteps = 40;
     [SerializeField] private int seed = 1;
+    //Step 2:
+    [SerializeField] private int visionRadius = 2;
+    [SerializeField] private ObservationMode observationMode = ObservationMode.VisibleOnly;
+    [SerializeField] private bool showFullMapDebug = false;   // develope model can see all map, when turn off model can see the fog
 
     public GridGame.Core.GridGame Game { get; private set; }
 
@@ -17,7 +21,7 @@ public class GridView : MonoBehaviour
 
     private void Start()
     {
-        Game = new GridGame.Core.GridGame(width, height, maxSteps, seed);
+        Game = new GridGame.Core.GridGame(width, height, maxSteps, seed, visionRadius);
         BuildView();
         Refresh();
     }
@@ -53,7 +57,17 @@ public class GridView : MonoBehaviour
     {
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
-                _tileRenderers[x, y].color = TileColor(Game.Tiles[x, y]);
+            {
+                Color c = TileColor(Game.Tiles[x, y]);
+                if (!showFullMapDebug)
+                {
+                    if (!Game.Explored[x, y])
+                        c = Color.black;
+                    else if (!Game.IsVisible(x, y))
+                        c = new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f, 1f);   // If explored floor does not in the view, turn it dark.  探索過但不在視野內:變暗
+                }
+                _tileRenderers[x, y].color = c;
+            }
 
         _playerRenderer.transform.position = new Vector3(Game.Player.x, Game.Player.y, 0);
     }
@@ -81,5 +95,12 @@ public class GridView : MonoBehaviour
     {
         Game.Reset(newSeed);
         Refresh();
+    }
+
+    // Step 2:
+    public void DebugPrintObservation()
+    {
+        Debug.Log(ObservationBuilder.ToJson(Game, observationMode, true));
+        Debug.Log("\n" + string.Join("\n", ObservationBuilder.Build(Game, observationMode).Map));
     }
 }

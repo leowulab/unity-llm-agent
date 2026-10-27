@@ -12,5 +12,6 @@ public class KeyboardInput : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftArrow)) view.DoMove(Direction.Left);
         if (Input.GetKeyDown(KeyCode.RightArrow)) view.DoMove(Direction.Right);
         if (Input.GetKeyDown(KeyCode.R)) view.DoReset(Random.Range(0, 99999));
+        if (Input.GetKeyDown(KeyCode.O)) view.DebugPrintObservation();
     }
 }
