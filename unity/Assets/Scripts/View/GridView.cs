@@ -16,6 +16,12 @@ public class GridView : MonoBehaviour
 
     public GridGame.Core.GridGame Game { get; private set; }
 
+    public ObservationMode Mode
+    {
+        get => observationMode;
+        set => observationMode = value;
+    }
+
     private SpriteRenderer[,] _tileRenderers;
     private SpriteRenderer _playerRenderer;
 
@@ -64,7 +70,7 @@ public class GridView : MonoBehaviour
                     if (!Game.Explored[x, y])
                         c = Color.black;
                     else if (!Game.IsVisible(x, y))
-                        c = new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f, 1f);   // If explored floor does not in the view, turn it dark.  探索過但不在視野內:變暗
+                        c = new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f, 1f);   // If explored floor does not in the view, turn it dark. #探索過但不在視野內:變暗
                 }
                 _tileRenderers[x, y].color = c;
             }

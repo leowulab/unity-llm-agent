@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>WS Test</title>
+<body style="font-family:monospace">
+<button onclick="send({cmd:'get_state'})">get_state</button>
+<button onclick="send({cmd:'move',direction:'up'})">up</button>
+<button onclick="send({cmd:'move',direction:'down'})">down</button>
+<button onclick="send({cmd:'move',direction:'left'})">left</button>
+<button onclick="send({cmd:'move',direction:'right'})">right</button>
+<button onclick="send({cmd:'reset',seed:1,mode:'visible_only'})">reset(seed=1)</button>
+<pre id="out"></pre>
+<script>
+  let id = 0;
+  const out = document.getElementById("out");
+  const ws = new WebSocket("ws://127.0.0.1:8765");
+  ws.onopen = () => out.textContent = "connected\n";
+  ws.onclose = () => out.textContent += "\ndisconnected";
+  ws.onmessage = e => {
+    const r = JSON.parse(e.data);
+    const head = `ok=${r.ok} success=${r.success} event=${r.event ?? r.error}\n${r.message ?? ""}\n\n`;
+    out.textContent = head + (r.observation ? r.observation.map.join("\n") : "");
+  };
+  function send(o) { ws.send(JSON.stringify({id: ++id, ...o})); }
+</script>
